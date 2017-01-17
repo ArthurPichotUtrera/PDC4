@@ -1,39 +1,38 @@
 import csv
+import math
+import numpy as np
 
 ################### Feature Extraction Template #############################
 
+poss_act_0 = ["hotkey"+str(i)+"0" for i in range(10)]
 poss_act_1 = ["hotkey"+str(i)+"1" for i in range(10)]
 poss_act_2 = ["hotkey"+str(i)+"2" for i in range(10)]
-possible_actions = ['s', 'sBase', 'sMineral'] + poss_act_1 + poss_act_2
+possible_actions = ['s', 'sBase', 'sMineral'] + poss_act_0 + poss_act_1 + poss_act_2
 
+filename = "../train.csv"
 
-ifile = open("first_100_train.csv", 'rb')
-reader=csv.reader(ifile)
-ofile = open("features_first100_train.csv", 'r+')
-#writer = csv.writer(ofile, delimiter=';')
+def get_features(filename):
+    # Get data
+    features = np.ndarray((0,len(possible_actions)))
+    classes = np.ndarray((0,1))
+    ifile = open(filename, 'rb')
+    reader = csv.reader(ifile)
+    next(reader) # Skip header
 
-rownum = 1
-newrow = ''
-
-for row in reader:
-    if rownum <= 1000:
-        colnum = 0
-        newrow= row[0] + ", " + row[1]
+    for row in reader:
+        classes = np.append(classes, [[row[0].split(";")[0]]], axis=0)
+        tmp = list()
+        nb_of_actions = (len(row) - 1)/2
         for action in possible_actions:
-            newrow += ", " + str(row.count(action))
+            count = row.count(action)
+            if nb_of_actions > 0 :
+                #print(row.count(action))
+                #print("   "+str(1000*row.count(action)/float(nb_of_actions)))
+                tmp.append(1000*row.count(action)/float(nb_of_actions)) # /float(nb_of_actions)
+            else:
+                tmp.append(0)
+        features = np.append(features, [tmp], axis=0)
 
-        #for col in row:
-        #    if colnum == 0:
-        #        newrow = col
-        #    if colnum != 0 and not col.isdigit():
-        #        newrow += col + ", "
-        #    colnum += 1
-        ofile.write(newrow + "\n")
-        newrow=''
-        rownum += 1
+    ifile.close()
 
-ifile.close()
-ofile.close()
-
-#Format de sortie: Nom, Faction, s, sBase, sMineral, hotkey01, ..., hotkey 91,
-# hohtkey02, ..., hotkey 92
+    return(features, classes)

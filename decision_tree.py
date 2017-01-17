@@ -1,6 +1,8 @@
 import csv
+import math
 import numpy as np
 from sklearn import tree
+from template_feature_extraction import *
 
 ################### Feature Extraction Template #############################
 
@@ -11,47 +13,17 @@ possible_actions = ['s', 'sBase', 'sMineral'] + poss_act_0 + poss_act_1 + poss_a
 
 training_file = "../train.csv"
 testing_file = "../test.csv"
+#testing_file = "../train.csv"
 
 # Get training data
-features = np.ndarray((0,33))
-classes = np.ndarray((0,1))
-ifile = open(training_file, 'rb')
-reader = csv.reader(ifile)
-next(reader) # Skip header
-
-for row in reader:
-    classes = np.append(classes, [[row[0].split(";")[0]]], axis=0)
-
-    tmp = list()
-    nb_of_actions = len(row) - 1
-    for action in possible_actions:
-        count = row.count(action)
-        if nb_of_actions > 0 :
-            tmp.append(row.count(action)) #/float(nb_of_actions)
-        else:
-            tmp.append(0)
-    features = np.append(features, [tmp], axis=0)
-
-ifile.close()
+features, classes = get_features(training_file)
 
 # Learning
 clf = tree.DecisionTreeClassifier()
 clf = clf.fit(features, classes)
 
 # Get testing data
-ifile = open(testing_file, 'rb')
-reader = csv.reader(ifile)
-next(reader) # Skip header
-
-test_features = np.ndarray((0,33))
-row_names = []
-for row in reader:
-    row_names.append(row[0].split(";")[0])
-    tmp = list()
-    for action in possible_actions:
-        tmp.append(row.count(action))
-    test_features = np.append(test_features, [tmp], axis=0)
-ifile.close()
+test_features, row_names = get_features(testing_file)
 
 # Make predictions
 res = clf.predict(test_features)
@@ -59,14 +31,14 @@ res = clf.predict(test_features)
 # Print the number of correct predictions if we use same file for training and testing
 if training_file == testing_file:
     ok = 0
-    for i in range(len(res)):
+    for i in range(row_names.shape[0]):
         if classes[i,0] == res[i]: ok += 1
     print(str(ok) + "/" + str(len(res)))
 
 # Write predictions
 ofile = open("../res.csv", 'w')
 ofile.write("row ID,battleneturl\n")
-for i, name in enumerate(row_names):
-    ofile.write(name + "," + res[i] + "\n")
+for i in range(row_names.shape[0]):
+    ofile.write(row_names[i,0] + "," + res[i] + "\n")
 
 ofile.close()
