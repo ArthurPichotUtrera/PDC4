@@ -1,3 +1,4 @@
+Name, Faction, s, sBase, sMineral, hotkey01, hotkey11, hotkey21, hotkey31, hotkey41, hotkey51, hotkey61, hotkey71, hotkey81, hotkey91, hotkey02, hotkey12, hotkey22, hotkey32, hotkey42, hotkey52, hotkey62, hotkey72, hotkey82, hotkey92
 /MMA/, Terran, 291, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 108, 457, 1, 296, 89, 13, 0, 0, 0
 /Life/, Zerg, 323, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 532, 0, 253, 142, 8, 1, 0, 0
 /MMA/, Terran, 341, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 314, 217, 60, 653, 36, 47, 1, 0, 0

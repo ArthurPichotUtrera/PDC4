@@ -44,35 +44,21 @@ def extract_features(input_filename, output_filename, num_rows=9999999999): #Num
 ####################### Training ###########################
 
 def get_features(features_filename):
-    # Get data from csv into numpy ndarrays
+    # Get features from csv into numpy ndarrays
     ifile = open(features_filename, 'rb')
     reader = csv.reader(ifile)
 
     header = next(reader)
-    print header
 
-    #next(reader) # Skip header
-
-
-
-    features = np.ndarray((0,len(possible_actions)))
+    features = np.ndarray((0,len(header)-1)) # -1 parce que le nom n'est pas une feature.
     classes = np.ndarray((0,1))
 
 
-    #for row in reader:
-    #    classes = np.append(classes, [[row[0].split(";")[0]]], axis=0)
-    #    tmp = list()
-    #    nb_of_actions = (len(row) - 1)/2
-    #    for action in possible_actions:
-    #        count = row.count(action)
-    #        if nb_of_actions > 0 :
-    #            #print(row.count(action))
-    #            #print("   "+str(1000*row.count(action)/float(nb_of_actions)))
-    #            tmp.append(1000*row.count(action)/float(nb_of_actions)) # /float(nb_of_actions)
-    #        else:
-    #            tmp.append(0)
-    #    features = np.append(features, [tmp], axis=0)
+    for row in reader:
+        classes = np.append(classes, [[row.pop(0)]], axis=0)
+        features = np.append(features,[row], axis=0)
 
+    print features
     ifile.close()
     return(features, classes)
 
@@ -98,9 +84,9 @@ def train_validate(features_filename, lines_train, lines_validate=[]):
 ####################### What we actually do ####################################
 
 
-extract_features("first_100_train.csv", "features_first100_train.csv")
+#extract_features("first_100_train.csv", "features_first100_train.csv")
 #train_validate("features_first100_train.csv", range(100))
 
-#features, classes = get_features(features_first100_train)
+features, classes = get_features('features_first100_train.csv')
 
 ################################################################################
