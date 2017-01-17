@@ -18,6 +18,12 @@ def extract_features(input_filename, output_filename, num_rows=9999999999): #Num
     reader=csv.reader(ifile)
     ofile = open(output_filename, 'r+')
 
+    header = "Name, Faction"
+    for action in possible_actions:
+        header += ", " + action
+
+    ofile.write(header + "\n")
+
     rownum = 1
     newrow = ''
     for row in reader:
@@ -39,25 +45,33 @@ def extract_features(input_filename, output_filename, num_rows=9999999999): #Num
 
 def get_features(features_filename):
     # Get data from csv into numpy ndarrays
-    features = np.ndarray((0,len(possible_actions)))
-    classes = np.ndarray((0,1))
     ifile = open(features_filename, 'rb')
     reader = csv.reader(ifile)
-    next(reader) # Skip header
 
-    for row in reader:
-        classes = np.append(classes, [[row[0].split(";")[0]]], axis=0)
-        tmp = list()
-        nb_of_actions = (len(row) - 1)/2
-        for action in possible_actions:
-            count = row.count(action)
-            if nb_of_actions > 0 :
-                #print(row.count(action))
-                #print("   "+str(1000*row.count(action)/float(nb_of_actions)))
-                tmp.append(1000*row.count(action)/float(nb_of_actions)) # /float(nb_of_actions)
-            else:
-                tmp.append(0)
-        features = np.append(features, [tmp], axis=0)
+    header = next(reader)
+    print header
+
+    #next(reader) # Skip header
+
+
+
+    features = np.ndarray((0,len(possible_actions)))
+    classes = np.ndarray((0,1))
+
+
+    #for row in reader:
+    #    classes = np.append(classes, [[row[0].split(";")[0]]], axis=0)
+    #    tmp = list()
+    #    nb_of_actions = (len(row) - 1)/2
+    #    for action in possible_actions:
+    #        count = row.count(action)
+    #        if nb_of_actions > 0 :
+    #            #print(row.count(action))
+    #            #print("   "+str(1000*row.count(action)/float(nb_of_actions)))
+    #            tmp.append(1000*row.count(action)/float(nb_of_actions)) # /float(nb_of_actions)
+    #        else:
+    #            tmp.append(0)
+    #    features = np.append(features, [tmp], axis=0)
 
     ifile.close()
     return(features, classes)
@@ -74,7 +88,7 @@ def predict(features_filename, testing_filename, output_filename):
 
 ####################### Training and Validating #############################
 
-def train_validate(features_filename, lines_train, lines_validate):
+def train_validate(features_filename, lines_train, lines_validate=[]):
     features, classes = get_features(features_filename)
     model = [] #train_decision_tree(features_filename, lines_train)
     accuracy = validate(model, features_filename, lines_validate)
@@ -84,11 +98,9 @@ def train_validate(features_filename, lines_train, lines_validate):
 ####################### What we actually do ####################################
 
 
-
-input_filename = "first_100_train.csv"
-output_filename = "features_first100_train.csv"
-
 extract_features("first_100_train.csv", "features_first100_train.csv")
+#train_validate("features_first100_train.csv", range(100))
 
+#features, classes = get_features(features_first100_train)
 
 ################################################################################
