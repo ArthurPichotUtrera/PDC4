@@ -1,7 +1,7 @@
 import csv
 import math
 import numpy as np
-#from decision_tree import *
+from decision_tree import train_tree
 
 
 poss_act_0 = ["hotkey"+str(i)+"0" for i in range(10)]
@@ -41,7 +41,7 @@ def extract_features(input_filename, output_filename, num_rows=9999999999): #Num
     ofile.close()
     return
 
-####################### Training ###########################
+####################### Getting the features ###########################
 
 def get_features(features_filename):
     # Get features from csv into numpy ndarrays
@@ -58,7 +58,6 @@ def get_features(features_filename):
         classes = np.append(classes, [[row.pop(0)]], axis=0)
         features = np.append(features,[row], axis=0)
 
-    print features
     ifile.close()
     return(features, classes)
 
@@ -76,17 +75,20 @@ def predict(features_filename, testing_filename, output_filename):
 
 def train_validate(features_filename, lines_train, lines_validate=[]):
     features, classes = get_features(features_filename)
-    model = [] #train_decision_tree(features_filename, lines_train)
-    accuracy = validate(model, features_filename, lines_validate)
 
+    model = [] #train_decision_tree(features, classes, lines_train)
+    #accuracy = validate(model, features_filename, lines_validate)
+
+    accuracy = []
     return model, accuracy
 
 ####################### What we actually do ####################################
 
 
 #extract_features("first_100_train.csv", "features_first100_train.csv")
-#train_validate("features_first100_train.csv", range(100))
-
+#model, accuracy = train_validate("features_first100_train.csv", range(100))
 features, classes = get_features('features_first100_train.csv')
+model = train_tree(features, classes)
+
 
 ################################################################################

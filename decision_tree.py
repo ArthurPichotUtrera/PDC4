@@ -2,7 +2,7 @@ import csv
 import math
 import numpy as np
 from sklearn import tree
-from template_feature_extraction import *
+#from template_feature_extraction import *
 
 ################### Feature Extraction Template #############################
 
@@ -15,30 +15,30 @@ training_file = "../train.csv"
 testing_file = "../test.csv"
 #testing_file = "../train.csv"
 
-# Get training data
-features, classes = get_features(training_file)
+def train_tree(features, classes, lines_train=999999999):
 
-# Learning
-clf = tree.DecisionTreeClassifier()
-clf = clf.fit(features, classes)
+    # Learning
+    clf = tree.DecisionTreeClassifier()
+    #clf = clf.fit(features, classes)
+    return clf
 
-# Get testing data
-test_features, row_names = get_features(testing_file)
+    # Get testing data
+    #test_features, row_names = get_features(testing_file)
 
-# Make predictions
-res = clf.predict(test_features)
+    # Make predictions
+    #res = clf.predict(test_features)
 
-# Print the number of correct predictions if we use same file for training and testing
-if training_file == testing_file:
-    ok = 0
-    for i in range(row_names.shape[0]):
-        if classes[i,0] == res[i]: ok += 1
-    print(str(ok) + "/" + str(len(res)))
+    # Print the number of correct predictions if we use same file for training and testing
+    #if training_file == testing_file:
+    #    ok = 0
+    #    for i in range(row_names.shape[0]):
+    #        if classes[i,0] == res[i]: ok += 1
+    #    print(str(ok) + "/" + str(len(res)))
 
-# Write predictions
-ofile = open("../res.csv", 'w')
-ofile.write("row ID,battleneturl\n")
-for i in range(row_names.shape[0]):
-    ofile.write(row_names[i,0] + "," + res[i] + "\n")
+    # Write predictions
+    #ofile = open("../res.csv", 'w')
+    #ofile.write("row ID,battleneturl\n")
+    #for i in range(row_names.shape[0]):
+    #    ofile.write(row_names[i,0] + "," + res[i] + "\n")
 
-ofile.close()
+    #ofile.close()
