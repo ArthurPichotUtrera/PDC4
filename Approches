@@ -1,0 +1,28 @@
+Nos données sont des séquences d'actions datées dans le temps.
+Selon https://www.cs.sfu.ca/~jpei/publications/Sequence%20Classification.pdf ,
+il s'agit d'une simple time series.
+
+Il existe plusieurs approches pour la classification de simple time series:
+- Extraire des features puis les analyser avec des outils de classification
+classiques (Decision Tree, PCA, SVM, Neural Networks)
+- Utiliser des mesures de distance entre les séquences
+- Model based classification, c'est-à-dire qu'on utilise des outils faits
+spécifiquement pour les séquences d'action.
+
+Dans le premier cas, il faut à la fois choisir la méthode de classification,
+et les features extraits.
+
+En-dehors de ça, étant donné qu'on ne dispose pas des résultats pour les tests,
+et qu'on ne peut soumettre de proposition que 5 fois par jour, il serait
+judicieux de coder une fonction qui sélectionne au hasard 10% des données
+pour former le validation set.
+Ainsi à chaque training, on n'entraîne que sur une partie des données et on teste sur
+le reste. Comme ça on fait moins d'overfitting.
+
+
+Idées d'extraction de features:
+- Prendre les 10/20/100 premiers états ou temps comme features
+- Prendre les fréquences de transition (cb de fois a-t-il fait s puis s? s puis sBase? etc...)
+- Comment traiter les hotkeys? On ferait bien de lire un peu sur le sujet:
+on peut les anonymiser, c'est à dire les regrouper plus ou moins. Ou les renommer en fonction de
+leur fréquence.
