@@ -1,5 +1,5 @@
-train = open("test.csv", 'r')
-first_100 = open("first_100_test.csv", 'w')
+train = open("train.csv", 'r')
+first_100 = open("first_100_train.csv", 'w')
 
 print train.readline()
 

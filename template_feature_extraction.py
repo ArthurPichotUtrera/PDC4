@@ -4,21 +4,23 @@ import numpy as np
 from decision_tree import train_tree
 
 
+
+maxlines = 999999
 poss_act_0 = ["hotkey"+str(i)+"0" for i in range(10)]
 poss_act_1 = ["hotkey"+str(i)+"1" for i in range(10)]
 poss_act_2 = ["hotkey"+str(i)+"2" for i in range(10)]
-possible_actions = ['s', 'sBase', 'sMineral'] + poss_act_1 + poss_act_2
+possible_actions = ['s', 'sBase', 'sMineral'] + poss_act_0 + poss_act_1 + poss_act_2
 
-################### Feature Extraction #############################
+################### Feature Extraction #########################################
 
-def extract_features(input_filename, output_filename, num_rows=9999999999): #Num rows est
+def extract_features(input_filename, output_filename, num_rows=maxlines): #Num rows est
 #le nombre max de lignes a traiter. Par defaut pas de limite
 
     ifile = open(input_filename, 'rb')
     reader=csv.reader(ifile)
     ofile = open(output_filename, 'r+')
 
-    header = "Name, Faction"
+    header = "Name"#, Faction"
     for action in possible_actions:
         header += ", " + action
 
@@ -30,7 +32,7 @@ def extract_features(input_filename, output_filename, num_rows=9999999999): #Num
         #Ici extraction et ecriture des features de chaque ligne
         if rownum <= num_rows: #Pour verifier sur quelques lignes au debut
             colnum = 0
-            newrow = row[0] + ", " + row[1] #Le nom du joueur puis la faction
+            newrow = row[0].split(';')[0]# + ", " + row[1] #Le nom du joueur# puis la faction
             for action in possible_actions:
                 newrow += ", "  + str(row.count(action))
             ofile.write(newrow + "\n") #Inscription de la ligne sur le fichier
@@ -41,54 +43,101 @@ def extract_features(input_filename, output_filename, num_rows=9999999999): #Num
     ofile.close()
     return
 
-####################### Getting the features ###########################
+####################### Getting the features ###################################
 
-def get_features(features_filename):
-    # Get features from csv into numpy ndarrays
+def get_features(features_filename, lines_train=range(maxlines)):
+    # Lit les features d'un fichier csv avec un header coherent.
+    # Separe les features des lignes de training et les features des lignes de validation.
+    # Si on veut les features de tout le fichier, ne pas specifier lines_train.
+
+    # Get features from csv at lines specified into numpy ndarrays. Csv must have a coherent header.
     ifile = open(features_filename, 'rb')
     reader = csv.reader(ifile)
 
     header = next(reader)
 
-    features = np.ndarray((0,len(header)-1)) # -1 parce que le nom n'est pas une feature.
-    classes = np.ndarray((0,1))
-
+    features_train = np.ndarray((0,len(header)-1)) # -1 parce que le nom n'est pas une feature.
+    features_validate = np.ndarray((0,len(header)-1))
+    classes_train = np.ndarray((0,1))
+    classes_validate = np.ndarray((0,1))
 
     for row in reader:
-        classes = np.append(classes, [[row.pop(0)]], axis=0)
-        features = np.append(features,[row], axis=0)
+        if reader.line_num in lines_train:
+            classes_train = np.append(classes_train, [[row.pop(0)]], axis=0)
+            features_train = np.append(features_train,[row], axis=0)
+
+        else:
+            classes_validate = np.append(classes_validate, [[row.pop(0)]], axis=0)
+            features_validate = np.append(features_validate, [row], axis=0)
 
     ifile.close()
-    return(features, classes)
+    print "Extracted features from " + features_filename
+    return features_train, features_validate, classes_train, classes_validate
 
-########################### Predicting #################################
+############################# Getting features from testing data ######################
+def get_features_test(features_filename):
+    features, useless_validation, classes, useless_validate_classes = get_features(features_filename)
+    # On utilise la fonction precedente avec toutes les lignes dans le "train". les
+    # classes ne nous interessent pas car elles sont anonymes.
+    return features, classes
 
-def predict(features_filename, testing_filename, output_filename):
-    lines_train = range(len(features_filename)) #pu un truc dans le genre
-    lines_validate = []
-    model, accuracy = train_validate(features_filename, lines_train, lines_validate)
-    #Todo: ouvrir le fichier testing en read, output en write
-    #Todo: utiliser le modele sur chaque ligne et ecrire le resultat dans l'output.
-    return
 
-####################### Training and Validating #############################
+####################### Validating #############################################
 
-def train_validate(features_filename, lines_train, lines_validate=[]):
-    features, classes = get_features(features_filename)
+def validate(model, features, classes):
+    predictions = model.predict(features)
+    print "Prediction des classes"
+    accuracy = 0
+    num_features = features.shape[0]
+    print "Taille de validation: "
+    print num_features
+    print "Comparaison des classes"
+    for i in range(num_features):
+        if predictions[i] == classes[i]:
+            accuracy += 1./num_features
+    print "Precision: " + str(accuracy)
+    return accuracy
 
-    model = [] #train_decision_tree(features, classes, lines_train)
-    #accuracy = validate(model, features_filename, lines_validate)
+####################### Training and Validating ################################
 
-    accuracy = []
+def train_validate(features_filename, lines_train=range(maxlines)):
+    features_train, features_validate, classes_train,  classes_validate = get_features(features_filename, lines_train)
+    model = train_tree(features_train, classes_train)
+
+    if lines_train == range(maxlines): # Si on entraine sur toutes les lignes
+        print "Pas de validation, la mesure de la precision se fait sur le training dataset"
+        accuracy = validate(model, features_train, classes_train)
+    else:
+        print "Mesure de la precision sur le validation dataset"
+        accuracy = validate(model, features_validate, classes_validate)
+
     return model, accuracy
+
+########################### Predicting ########################################
+
+def predict(model, testing_features_filename, output_filename):
+    features, classes = get_features_test(testing_features_filename)
+    predictions = model.predict(features)
+
+    ofile = open(output_filename, 'r+')
+    ofile.write("row ID,battleneturl\n")
+
+    for i in range(features.shape[0]):
+        ofile.write(classes[i,0] + "," + predictions[i] + "\n")
+
+    ofile.close()
+    print "Prediction done and written in " + output_filename
+    return
 
 ####################### What we actually do ####################################
 
-
 #extract_features("first_100_train.csv", "features_first100_train.csv")
-#model, accuracy = train_validate("features_first100_train.csv", range(100))
-features, classes = get_features('features_first100_train.csv')
-model = train_tree(features, classes)
+#extract_features("first_100_test.csv", "features_first100_test.csv")
 
+#extract_features("train.csv", "features_train.csv")
+#extract_features("test.csv", "features_test.csv")
+
+model, accuracy = train_validate("features_train.csv")
+predict(model, "features_test.csv", "res.csv")
 
 ################################################################################
