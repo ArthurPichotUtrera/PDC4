@@ -14,12 +14,6 @@ def extract_features(input_filename, output_filename, num_rows=maxlines): #Num r
     reader = csv.reader(ifile)
     ofile = open(output_filename, 'w')
 
-    # header = "Name"#, Faction"
-    # for action in possible_actions:
-    #     header += ", " + action
-    #
-    # ofile.write(header + "\n")
-
     rownum = 1
 
     head = reader.next()
@@ -28,10 +22,15 @@ def extract_features(input_filename, output_filename, num_rows=maxlines): #Num r
         #Ici extraction et ecriture des features de chaque ligne
         if rownum <= num_rows: #Pour verifier sur quelques lignes au debut
             newrow = row[0].split(';')[0]
+
+            #get_x_first_frames(row, 100)
+
             #Extraction de features
             features.extend(frequence_actions(row))
             features.extend(faction(row))
+            features.extend(get_mean_frequency(row))
 
+            #Add features in new row, then write in file
             for feature in features:
                 newrow +=  ", " + str(feature)
             ofile.write(newrow + "\n") #Inscription de la ligne sur le fichier
@@ -84,6 +83,11 @@ def get_x_first_frames(row, x):
         i += 2
     return res
 
-print(get_x_first_frames(test, 100))
-
 ############################################################
+
+# TODO: Distinguer les actions avec le clavier et les actions avec la sourie
+def get_mean_frequency(row, before_frame_x = float('inf')):
+
+    frames = row[len(row)-1]
+    nb_actions = (len(row)-1)/2
+    return [nb_actions/float(frames)]

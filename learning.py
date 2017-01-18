@@ -109,13 +109,13 @@ def predict(model, testing_features_filename, output_filename):
 #extract_features("first_100_train.csv", "features_first100_train.csv")
 #extract_features("first_100_test.csv", "features_first100_test.csv")
 
-#extract_features("train.csv", "features_train.csv")
-#extract_features("test.csv", "features_test.csv")
+extract_features("train_clean.csv", "features_train.csv")
+extract_features("test.csv", "features_test.csv")
 
 # Selection de 300 lignes environs pour la validation
 lines_train = range(4200)
-#for i in range(350):
-#    lines_train.pop(randint(0,len(lines_train)-1))
+for i in range(350):
+    lines_train.pop(randint(0,len(lines_train)-1))
 
 model, accuracy = train_validate("features_train.csv", lines_train)
 predict(model, "features_test.csv", "res.csv")
