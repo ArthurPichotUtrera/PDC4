@@ -23,11 +23,11 @@ def extract_features(input_filename, output_filename, num_rows=maxlines): #Num r
         if rownum <= num_rows: #Pour verifier sur quelques lignes au debut
             newrow = row[0].split(';')[0]
 
-            #get_x_first_frames(row, 100)
+            row = get_x_first_frames(row, 2000)
 
             #Extraction de features
-            features.extend(frequence_actions(row))
             features.extend(faction(row))
+            features.extend(frequence_actions(row))
             features.extend(get_mean_frequency(row))
 
             #Add features in new row, then write in file
@@ -74,6 +74,7 @@ def faction(row):
 ############################################################
 
 def get_x_first_frames(row, x):
+
     i = 1
     res = [row[0]]
 
@@ -90,4 +91,8 @@ def get_mean_frequency(row, before_frame_x = float('inf')):
 
     frames = row[len(row)-1]
     nb_actions = (len(row)-1)/2
-    return [nb_actions/float(frames)]
+
+    try:
+        return [nb_actions/float(frames)]
+    except ValueError:
+        return 0
