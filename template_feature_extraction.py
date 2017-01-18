@@ -11,33 +11,30 @@ def extract_features(input_filename, output_filename, num_rows=maxlines): #Num r
 #le nombre max de lignes a traiter. Par defaut pas de limite
 
     ifile = open(input_filename, 'rb')
-    reader=csv.reader(ifile)
+    reader = csv.reader(ifile)
     ofile = open(output_filename, 'w')
 
-    header = "Name"#, Faction"
-    for action in possible_actions:
-        header += ", " + action
-
-    ofile.write(header + "\n")
+    # header = "Name"#, Faction"
+    # for action in possible_actions:
+    #     header += ", " + action
+    #
+    # ofile.write(header + "\n")
 
     rownum = 1
-    newrow = ''
 
     head = reader.next()
     for row in reader:
         features = list()
         #Ici extraction et ecriture des features de chaque ligne
         if rownum <= num_rows: #Pour verifier sur quelques lignes au debut
-            newrow = row[0].split(';')[0]# + ", " + row[1] #Le nom du joueur# puis la faction
-
+            newrow = row[0].split(';')[0]
             #Extraction de features
             features.extend(frequence_actions(row))
-            #features.extend(faction(row))
+            features.extend(faction(row))
 
             for feature in features:
                 newrow +=  ", " + str(feature)
             ofile.write(newrow + "\n") #Inscription de la ligne sur le fichier
-            newrow = ''
             rownum += 1
 
     ifile.close()

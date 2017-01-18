@@ -18,10 +18,11 @@ def get_features(features_filename, lines_train=range(maxlines)):
     ifile = open(features_filename, 'rb')
     reader = csv.reader(ifile)
 
-    header = next(reader)
+    nb_features = len(next(reader))
+    ifile.seek(0)
 
-    features_train = np.ndarray((0,len(header)-1)) # -1 parce que le nom n'est pas une feature.
-    features_validate = np.ndarray((0,len(header)-1))
+    features_train = np.ndarray((0,nb_features-1))
+    features_validate = np.ndarray((0,nb_features-1))
     classes_train = np.ndarray((0,1))
     classes_validate = np.ndarray((0,1))
 
@@ -32,7 +33,6 @@ def get_features(features_filename, lines_train=range(maxlines)):
 
         else:
             classes_validate = np.append(classes_validate, [[row.pop(0)]], axis=0)
-            if len(row) < 33 : print row
             features_validate = np.append(features_validate, [row], axis=0)
 
     ifile.close()
