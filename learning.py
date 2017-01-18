@@ -32,6 +32,7 @@ def get_features(features_filename, lines_train=range(maxlines)):
 
         else:
             classes_validate = np.append(classes_validate, [[row.pop(0)]], axis=0)
+            if len(row) < 33 : print row
             features_validate = np.append(features_validate, [row], axis=0)
 
     ifile.close()
