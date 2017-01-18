@@ -3,7 +3,9 @@ import math
 import numpy as np
 from decision_tree import train_tree
 from decision_tree import train_rforest
+from decision_tree import train_svm, train_logistic
 from template_feature_extraction import extract_features
+from random import randint
 
 maxlines = 999999
 
@@ -28,11 +30,16 @@ def get_features(features_filename, lines_train=range(maxlines)):
     for row in reader:
         if reader.line_num in lines_train:
             classes_train = np.append(classes_train, [[row.pop(0)]], axis=0)
-            features_train = np.append(features_train,[row], axis=0)
-
+            row_float = []
+            for col in row:
+                row_float += [float(col)]
+            features_train = np.append(features_train,[row_float], axis=0)
         else:
             classes_validate = np.append(classes_validate, [[row.pop(0)]], axis=0)
-            features_validate = np.append(features_validate, [row], axis=0)
+            row_float = []
+            for col in row:
+                row_float += [float(col)]
+            features_validate = np.append(features_validate, [row_float], axis=0)
 
     ifile.close()
     print "Extracted features from " + features_filename
@@ -68,13 +75,15 @@ def train_validate(features_filename, lines_train=range(maxlines)):
     features_train, features_validate, classes_train,  classes_validate = get_features(features_filename, lines_train)
     #model = train_tree(features_train, classes_train)
     model = train_rforest(features_train, classes_train, 200)
+    #model = train_svm(features_train, classes_train)
+    #model = train_logistic(features_train, classes_train)
 
-    if lines_train == range(maxlines): # Si on entraine sur toutes les lignes
+    if lines_train == range(4200): # Si on entraine sur toutes les lignes
         print "Pas de validation, la mesure de la precision se fait sur le training dataset"
         accuracy = validate(model, features_train, classes_train)
     else:
         print "Mesure de la precision sur le validation dataset"
-        accuracy = validate(model, features_validate, classes_validate)
+        accuracy = validate(model, features_validate, np.ravel(classes_validate))
 
     return model, accuracy
 
@@ -99,10 +108,13 @@ def predict(model, testing_features_filename, output_filename):
 #extract_features("first_100_train.csv", "features_first100_train.csv")
 #extract_features("first_100_test.csv", "features_first100_test.csv")
 
-extract_features("train.csv", "features_train.csv")
-extract_features("test.csv", "features_test.csv")
+#extract_features("train.csv", "features_train.csv")
+#extract_features("test.csv", "features_test.csv")
 
-lines_train = range(3700)#[i+100 for i in range(99999)]
+# Selection de 300 lignes environs pour la validation
+lines_train = range(4200)
+#for i in range(350):
+#    lines_train.pop(randint(0,len(lines_train)-1))
 
 model, accuracy = train_validate("features_train.csv", lines_train)
 predict(model, "features_test.csv", "res.csv")
