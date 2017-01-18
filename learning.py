@@ -20,10 +20,11 @@ def get_features(features_filename, lines_train=range(maxlines)):
     ifile = open(features_filename, 'rb')
     reader = csv.reader(ifile)
 
-    header = next(reader)
+    nb_features = len(next(reader))
+    ifile.seek(0)
 
-    features_train = np.ndarray((0,len(header)-1)) # -1 parce que le nom n'est pas une feature.
-    features_validate = np.ndarray((0,len(header)-1))
+    features_train = np.ndarray((0,nb_features-1))
+    features_validate = np.ndarray((0,nb_features-1))
     classes_train = np.ndarray((0,1))
     classes_validate = np.ndarray((0,1))
 
