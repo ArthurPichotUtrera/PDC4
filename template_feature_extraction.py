@@ -2,7 +2,7 @@ import csv
 import math
 import numpy as np
 from decision_tree import train_tree
-
+from decision_tree import train_rforest
 
 
 maxlines = 999999
@@ -28,6 +28,8 @@ def extract_features(input_filename, output_filename, num_rows=maxlines): #Num r
 
     rownum = 1
     newrow = ''
+
+    head = reader.next()
     for row in reader:
         #Ici extraction et ecriture des features de chaque ligne
         if rownum <= num_rows: #Pour verifier sur quelques lignes au debut
@@ -102,7 +104,8 @@ def validate(model, features, classes):
 
 def train_validate(features_filename, lines_train=range(maxlines)):
     features_train, features_validate, classes_train,  classes_validate = get_features(features_filename, lines_train)
-    model = train_tree(features_train, classes_train)
+    #model = train_tree(features_train, classes_train)
+    model = train_rforest(features_train, classes_train, 200)
 
     if lines_train == range(maxlines): # Si on entraine sur toutes les lignes
         print "Pas de validation, la mesure de la precision se fait sur le training dataset"
@@ -134,10 +137,12 @@ def predict(model, testing_features_filename, output_filename):
 #extract_features("first_100_train.csv", "features_first100_train.csv")
 #extract_features("first_100_test.csv", "features_first100_test.csv")
 
-#extract_features("train.csv", "features_train.csv")
-#extract_features("test.csv", "features_test.csv")
+extract_features("train.csv", "features_train.csv")
+extract_features("test.csv", "features_test.csv")
 
-model, accuracy = train_validate("features_train.csv")
+lines_train = range(3700)#[i+100 for i in range(99999)]
+
+model, accuracy = train_validate("features_train.csv", lines_train)
 predict(model, "features_test.csv", "res.csv")
 
 ################################################################################
