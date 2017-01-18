@@ -59,6 +59,7 @@ def frequence_actions(row):
 
 ############################################################
 
+# TODO: Faire 3 modeles
 def faction(row):
     """ Feature for the faction played. """
 
@@ -70,3 +71,19 @@ def faction(row):
     else:
         features = [0,0,1]
     return features
+
+############################################################
+
+def get_x_first_frames(row, x):
+    i = 1
+    res = [row[0]]
+
+    while i+1 < len(row) and int(row[i+1]) <= x:
+        res.append(row[i])
+        res.append(row[i+1])
+        i += 2
+    return res
+
+print(get_x_first_frames(test, 100))
+
+############################################################
