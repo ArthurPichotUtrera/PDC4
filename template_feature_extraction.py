@@ -30,6 +30,11 @@ def extract_features(input_filename, output_filename, num_rows=maxlines): #Num r
             features.extend(frequence_actions(row))
             features.extend(get_mean_frequency(row))
 
+            row = get_x_first_frames(row, 1000)
+            features.extend(get_mean_frequency(row))
+            row = get_x_first_frames(row, 100)
+            features.extend(get_mean_frequency(row))
+
             #Add features in new row, then write in file
             for feature in features:
                 newrow +=  ", " + str(feature)
@@ -95,4 +100,4 @@ def get_mean_frequency(row, before_frame_x = float('inf')):
     try:
         return [nb_actions/float(frames)]
     except ValueError:
-        return 0
+        return [0]
