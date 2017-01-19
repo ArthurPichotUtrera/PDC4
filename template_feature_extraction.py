@@ -23,16 +23,12 @@ def extract_features(input_filename, output_filename, num_rows=maxlines): #Num r
         if rownum <= num_rows: #Pour verifier sur quelques lignes au debut
             newrow = row[0].split(';')[0]
 
-            row = get_x_first_frames(row, 2000)
+            features.extend(get_first_action_frames(row))
 
             #Extraction de features
             features.extend(faction(row))
+            row = get_x_first_frames(row, 2000)
             features.extend(frequence_actions(row))
-            features.extend(get_mean_frequency(row))
-
-            row = get_x_first_frames(row, 1000)
-            features.extend(get_mean_frequency(row))
-            row = get_x_first_frames(row, 100)
             features.extend(get_mean_frequency(row))
 
             #Add features in new row, then write in file
@@ -101,3 +97,19 @@ def get_mean_frequency(row, before_frame_x = float('inf')):
         return [nb_actions/float(frames)]
     except ValueError:
         return [0]
+
+##################################################################
+
+def get_first_action_frames(row):
+    """ Compute the frame of the first s, sBase, sMineral. """
+    features = []
+    for action in ['s', 'sBase', 'sMineral']:
+        i=1
+        first_frame = 10000
+        while i < len(row):
+            if row[i] == action:
+                first_frame = row[i+1]
+                break
+            i += 2
+        features.append(first_frame)
+    return features

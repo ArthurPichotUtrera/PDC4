@@ -75,7 +75,7 @@ def validate(model, features, classes):
 def train_validate(features_filename, lines_train=range(maxlines)):
     features_train, features_validate, classes_train,  classes_validate = get_features(features_filename, lines_train)
     #model = train_tree(features_train, classes_train)
-    model = train_rforest(features_train, classes_train, 500)
+    model = train_rforest(features_train, classes_train, 200)
     #model = train_svm(features_train, classes_train)
     #model = train_logistic(features_train, classes_train)
 
@@ -114,13 +114,13 @@ extract_features("test.csv", "features_test.csv")
 
 # Selection de 300 lignes environs pour la validation
 total_acc = 0
-for i in range(5):
+for n in range(5):
     lines_train = range(4200)
     for i in range(350):
         lines_train.pop(randint(0,len(lines_train)-1))
 
     model, accuracy = train_validate("features_train.csv", lines_train)
-    print "Essai " + str(i) + ": accuracy = " + str(accuracy)
+    print "Essai " + str(n) + ": accuracy = " + str(accuracy)
     total_acc += accuracy/5
 print "Moyenne: accuracy = " + str(total_acc)
 #predict(model, "features_test.csv", "res.csv")
