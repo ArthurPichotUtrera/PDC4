@@ -29,6 +29,7 @@ def extract_features(input_filename, output_filename, num_rows=maxlines): #Num r
             features.extend(frequence_actions(row))
             features.extend(faction(row))
             features.extend(get_mean_frequency(row))
+            features.extend(get_frequency_histogram(row))
 
             #Add features in new row, then write in file
             for feature in features:
@@ -85,9 +86,49 @@ def get_x_first_frames(row, x):
 
 ############################################################
 
-# TODO: Distinguer les actions avec le clavier et les actions avec la sourie
+# TODO: Distinguer les actions avec le clavier et les actions avec la sourie ??
 def get_mean_frequency(row, before_frame_x = float('inf')):
-
+    """ Frequence moyenne entre deux actions """
+    # TODO: before frame x
     frames = row[len(row)-1]
     nb_actions = (len(row)-1)/2
     return [nb_actions/float(frames)]
+
+############################################################
+
+# TODO: Distinguer les actions avec le clavier et les actions avec la sourie
+def get_frequency_histogram(row, before_frame_x = float('inf')):
+    """ Retourne un histogramme contenant le pourcentage d'actions realisees de 0, 1, 2, ... x frames de l action precedente.  """
+
+    nb_actions = (len(row)-1)/2
+    i = 1
+    frame_previous_action = 0
+    x = 6
+    histogram = [0]*x
+    while i+1 < len(row) and int(row[i+1]) <= before_frame_x:
+        delta = int(row[i+1]) - frame_previous_action
+        if delta < x:
+            histogram[delta] += 1
+        frame_previous_action = int(row[i+1])
+        i += 2
+
+    for i in range(x):
+        histogram[i] /= float(nb_actions)
+    return histogram
+
+############################################################
+
+def get_sequence_similarity(row, nb_actions_max = float('inf')):
+    """ Similarite max pour chacun des player"""
+
+    names = list()
+    maxs = list()
+    ifile = open(input_filename, 'r')
+    reader = csv.reader(ifile)
+
+    head = reader.next()
+    for a_row in reader:
+        name = a_row[0].split(';')[0]
+        if name not in names:
+            names.append(name)
+        i = names.index(name)
