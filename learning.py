@@ -106,23 +106,16 @@ def predict(model, testing_features_filename, output_filename):
 
 ####################### What we actually do ####################################
 
-# TODO: Ecrire 10 lines_train dans un fichier et tester dessus
-#       pour comparer avec exactement les memes ensembles pour l entrainement et le test
-sum_accuracies = 0
-nb_tests = 1
-for i in range(nb_tests):
 
-    #extract_features("first_100_train.csv", "features_first100_train.csv")
-    #extract_features("first_100_test.csv", "features_first100_test.csv")
+#extract_features("first_100_train.csv", "features_first100_train.csv")
+#extract_features("first_100_test.csv", "features_first100_test.csv")
 
 extract_features("train_clean.csv", "features_train.csv")
 extract_features("test.csv", "features_test.csv")
 
-# Selection de 300 lignes environs pour la validation
 total_acc = 0
-
-for n in range(5):
-    # Selection de 300 lignes environs pour la validation
+nb_tests = 1
+for i in range(nb_tests):
     lines_train = range(4200)
     for i in range(350):
         lines_train.pop(randint(0,len(lines_train)-1))
@@ -130,7 +123,9 @@ for n in range(5):
     model, accuracy = train_validate("features_train.csv", lines_train)
     print "Essai " + str(n) + ": accuracy = " + str(accuracy)
     total_acc += accuracy/5
+
 print "Moyenne: accuracy = " + str(total_acc)
+
 #predict(model, "features_test.csv", "res.csv")
 
 ################################################################################

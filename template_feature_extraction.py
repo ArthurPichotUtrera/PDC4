@@ -22,12 +22,12 @@ def extract_features(input_filename, output_filename, num_rows=maxlines): #Num r
         #Ici extraction et ecriture des features de chaque ligne
         if rownum <= num_rows: #Pour verifier sur quelques lignes au debut
             newrow = row[0].split(';')[0]
-
-            features.extend(get_first_action_frames(row))
-
             #Extraction de features
+            features.extend(get_first_action_frames(row))
             features.extend(faction(row))
+
             row = get_x_first_frames(row, 2000)
+
             features.extend(frequence_actions(row))
             features.extend(get_mean_frequency(row))
             features.extend(get_frequency_histogram(row))
