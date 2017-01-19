@@ -121,6 +121,7 @@ for i in range(nb_tests):
         lines_train.pop(randint(0,len(lines_train)-1))
 
     model, accuracy = train_validate("features_train.csv", lines_train)
+    #print model.feature_importances_ 
     print "Essai " + str(n) + ": accuracy = " + str(accuracy)
     total_acc += accuracy/5
 
