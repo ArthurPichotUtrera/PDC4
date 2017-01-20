@@ -6,7 +6,7 @@ ofile = open("train_clean.csv", 'w')
 
 with open("train.csv") as f:
    for line in f:
-       if len(line.split(",")) > 20:
+       if len(line.split(",")) > 25:
            ofile.write(line)
 
 ofile.close()

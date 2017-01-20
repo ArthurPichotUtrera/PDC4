@@ -1,44 +1,57 @@
 import csv
 import math
 import numpy as np
-
+import string
+from wagnerfischerpp import *
 
 maxlines = 999999
 
 ################### Feature Extraction #########################################
 
-def extract_features(input_filename, output_filename, num_rows=maxlines): #Num rows est
+def extract_features(input_filename, lines_train, players_per_faction, nb_rows, num_rows=maxlines): #Num rows est
 #le nombre max de lignes a traiter. Par defaut pas de limite
 
     ifile = open(input_filename, 'rb')
     reader = csv.reader(ifile)
-    ofile = open(output_filename, 'w')
+    # reader.next()
+    ofile_protoss = open("features_protoss.csv", 'w')
+    ofile_terran = open("features_terran.csv", 'w')
+    ofile_zerg = open("features_zerg.csv", 'w')
 
-    rownum = 1
-
-    head = reader.next()
-    for row in reader:
+    for num_row, row in enumerate(reader):
         features = list()
         #Ici extraction et ecriture des features de chaque ligne
-        if rownum <= num_rows: #Pour verifier sur quelques lignes au debut
+        if num_row <= num_rows: #Pour verifier sur quelques lignes au debut
             newrow = row[0].split(';')[0]
-
-            row = get_x_first_frames(row, 2000)
+            faction = row[0].split(';')[1]
+            # row = get_x_first_frames(row, 2000) # TODO: A tester
 
             #Extraction de features
-            features.extend(faction(row))
             features.extend(frequence_actions(row))
             features.extend(get_mean_frequency(row))
             features.extend(get_frequency_histogram(row))
 
+            # TODO: lines_train attention
+            # features.extend(get_sequence_dissimilarity(row, players_per_faction, lines_train, 20))
+
+            features.extend(get_row_position(num_row, nb_rows)) # TODO moins bien pour zerg ???
+
             #Add features in new row, then write in file
             for feature in features:
                 newrow +=  ", " + str(feature)
-            ofile.write(newrow + "\n") #Inscription de la ligne sur le fichier
-            rownum += 1
+            # Write features in the right file
+            if faction == "Protoss":
+                ofile_protoss.write(newrow + "\n")
+            elif faction == "Terran":
+                ofile_terran.write(newrow + "\n")
+            else:
+                ofile_zerg.write(newrow + "\n")
 
     ifile.close()
-    ofile.close()
+    ofile_protoss.close()
+    ofile_terran.close()
+    ofile_zerg.close()
+
     return
 
 ############################################################
@@ -66,7 +79,7 @@ def faction(row):
     faction = row[0].split(';')[1]
     if faction == "Protoss":
         features = [1,0,0]
-    elif faction == "Zerg":
+    elif faction == "Terran":
         features = [0,1,0]
     else:
         features = [0,0,1]
@@ -116,24 +129,86 @@ def get_frequency_histogram(row, before_frame_x = float('inf')):
             histogram[delta] += 1
         frame_previous_action = int(row[i+1])
         i += 2
-
     for i in range(x):
         histogram[i] /= float(nb_actions)
     return histogram
 
 ############################################################
 
-def get_sequence_similarity(row, nb_actions_max = float('inf')):
-    """ Similarite max pour chacun des player"""
+actions_sequence = poss_act_0 + poss_act_1 + poss_act_2 #['s', 'sBase', 'sMineral'] + poss_act_0 + poss_act_1 + poss_act_2
 
-    names = list()
-    maxs = list()
-    ifile = open(input_filename, 'r')
+letters = list(string.ascii_letters)
+
+def action_to_letter(action):
+    if action in actions_sequence:
+        return letters[actions_sequence.index(action)]
+    return ""
+
+def get_sequence_dissimilarity(row, players_per_faction, lines_train, nb_actions_max = float('inf')):
+    """ Similarite max pour chacun des players. """
+
+    faction = row[0].split(';')[1]
+    # Noms des joueurs possibles
+    if faction == "Protoss":
+        f = 0
+    elif faction == "Terran":
+        f = 1
+    else:
+        f = 2
+    names = players_per_faction[f]
+    mins = [1]*len(names)
+    ifile = open("sequence_keys.csv", 'r')
     reader = csv.reader(ifile)
+    # reader.next()
+    row_seq = ""
+    a = 1
+    while a*2-1 < len(row) and len(row_seq) < nb_actions_max:
+        row_seq += action_to_letter(row[a*2-1])
+        a += 1
 
-    head = reader.next()
+    i = 0 # On utilise a_row si la ligne fait partie du training
     for a_row in reader:
-        name = a_row[0].split(';')[0]
-        if name not in names:
-            names.append(name)
-        i = names.index(name)
+        # Get player name
+        a_name = a_row[0].split(';')[0]
+        a_faction = a_row[0].split(';')[1]
+        if a_faction == faction : # Si
+            if i in lines_train[f]:
+                n = names.index(a_name)
+                # Get firsts actions
+                a_row_seq = a_row[1][:nb_actions_max]
+                # Get distance
+                if len(a_row_seq) != len(row_seq[:len(a_row_seq)]): print a_row_seq + "    " + row_seq
+                distance = WagnerFischer(a_row_seq, row_seq[:len(a_row_seq)]).cost
+                # update
+                if mins[n] > distance/float(len(a_row_seq)):
+                    mins[n] = distance/float(len(a_row_seq))
+            i += 1
+    return mins
+
+
+############################################################
+
+def create_sequence_file(filename = "train_clean.csv"):
+    ifile = open(filename, 'r') # TODO: filename in parameter
+    reader = csv.reader(ifile)
+    # reader.next()
+    ofile = open("sequence_"+filename, 'w')
+    # ofile.write("player;faction,sequence\n")
+
+    for row in reader:
+        new_row = row[0] + ","
+        a = 1
+        while a*2 - 1 < len(row): #and a <= nb_actions_max
+            new_row += action_to_letter(row[a*2 - 1])
+            a += 1
+        ofile.write(new_row + "\n")
+
+    ifile.close()
+    ofile.close()
+
+#create_sequence_file()
+
+############################################################
+
+def get_row_position(num_row, nb_rows):
+    return [num_row/float(nb_rows)]
